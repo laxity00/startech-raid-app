@@ -7,7 +7,7 @@ result = subprocess.run(sys.argv[1:], capture_output=True, text=True, check=True
 samples = [json.loads(line) for line in result.stdout.splitlines()]
 assert len(samples) == 32
 for sample in samples:
-    assert sample["schema"] == 1 and sample["tool_version"] == "0.3.2"
+    assert sample["schema"] == 1 and sample["tool_version"] == "0.3.3"
     assert not sample["array_synchronization_verified"]
     assert len(sample["ssds"]) == 2 and len(sample["transfers"]) <= 9
     if not sample["query_ok"]:
@@ -36,3 +36,8 @@ assert samples[13]["ssds"][0]["failed_prefail_attributes"] == 1
 assert not samples[30]["query_ok"]
 assert not samples[31]["smart_requested"] and len(samples[31]["transfers"]) == 3
 print(json.dumps({"mocked_samples": len(samples), "read_only_transport_and_failure_cases": True, "hardware_access": False}))
+
+# An EPERM open denial must be actionable and must not emit any request.
+assert 'errno=1' in samples[12]['error']
+assert 'Protection mode' in samples[12]['error']
+assert samples[12]['transfers'] == []

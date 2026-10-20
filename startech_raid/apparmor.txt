@@ -29,6 +29,15 @@ profile startech_raid flags=(attach_disconnected,mediate_deleted) {
   # Only the selected block device. Explicit denies override file/bootstrap rules.
   /dev/sda rk,
   deny /dev/sd* w,
+  # full_access is required by Supervisor for its own system disk. Keep other
+  # block devices, partition nodes and alternate SCSI/USB transports denied.
+  deny /dev/sd[b-z]* rwk,
+  deny /dev/sda[0-9]* rwk,
+  deny /dev/sda[a-z]* rwk,
+  deny /dev/{sg*,bsg/**,bus/usb/**} rwk,
+  deny /dev/{mapper/**,dm-*,loop*,md*,zram*,vd*,xvd*} rwk,
+  deny /dev/port rw,
+
   deny /dev/nvme* rw,
   deny /dev/mmcblk* rw,
   deny /dev/mem rw,

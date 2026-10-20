@@ -1,4 +1,40 @@
-# StarTech RAID Monitor 0.3.2 — experimental
+# StarTech RAID Monitor 0.3.3 — experimental
+
+## System-disk access in 0.3.3
+
+Supervisor 2026.10.2 refuses ordinary device permissions for disks used by HAOS,
+even when an app declares /dev/sda and SYS_RAWIO. Version 0.3.2 consequently cannot
+open a protected HAOS boot/data disk. This is a permissions failure, not a RAID
+failure, and no device request follows a failed open.
+
+This release declares full_access: true. It takes effect only with Protection
+mode OFF for this app. This grants a broad device-cgroup permission and access to
+the host device tree, so it is a real reduction in container isolation. It is not
+equivalent to an ordinary single-device grant. No protection setting is changed
+automatically. Leave Protection mode on if you do not accept that scope; the app
+will report Unknown when the system disk cannot be opened.
+
+To try the update: stop the app, refresh the App Store, update to 0.3.3, then turn
+off Protection mode for StarTech RAID Monitor only and start it. AppArmor remains
+enabled. Keep all other app protection settings unchanged. If the toggle is not
+visible, enable Advanced mode in your HA user profile. Restarting this app resets
+the paused SMART latch; no Home Assistant Core restart or integration update is
+needed. After startup inspect a fresh sample and the logs before enabling boot.
+
+The backend still opens only /dev/sda with O_RDONLY and the same identity/version
+checks and fixed read requests. No address scan, data-out, firmware operation,
+SMART self-test or write-access fallback is added. AppArmor denies raw disk writes,
+other block-device paths, partition nodes and alternate raw SCSI/USB paths. The
+profile reduces exposure but does not turn full_access into a single-device grant.
+
+If access still fails, the new message includes errno. Share that message and
+relevant Supervisor/AppArmor denials after removing identifying information.
+Do not disable AppArmor or alter permissions on other apps as a troubleshooting step.
+
+Primary references:
+https://github.com/home-assistant/supervisor/blob/2026.10.2/supervisor/hardware/policy.py
+https://github.com/home-assistant/supervisor/blob/2026.10.2/supervisor/docker/app.py
+
 
 Independent read-only RAID and SSD monitoring for the narrowly supported
 StarTech SM22BU31C3R / ASM1352R profile. Not affiliated with StarTech or ASMedia.

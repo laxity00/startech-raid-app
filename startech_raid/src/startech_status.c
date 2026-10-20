@@ -3,7 +3,7 @@
 #include "fixed_transport.c"
 #include <inttypes.h>
 #include <time.h>
-#define STATUS_VERSION "0.3.2"
+#define STATUS_VERSION "0.3.3"
 struct disk_info {
  bool identified, data_ok, thresholds_ok;
  unsigned char id[512], data[512], thresholds[512];
@@ -12,6 +12,7 @@ struct disk_info {
 };
 struct audit_entry {const struct request *r;struct transfer t;unsigned char bytes[512];};
 struct status_report {
+ char access_error[192];
  bool state_ok, smart_requested, duplicate_identity;
  unsigned raw, count;
  const char *error;
@@ -37,7 +38,11 @@ static int monitor_collect(bool smart,struct status_report *out) {
  char sys[PATH_MAX];struct stat st;
  if(!realpath("/sys/class/block/sda",sys)||!live_sysfs_identity(sys)){out->error="Pinned StarTech USB/SCSI identity mismatch";return 3;}
  int fd=open("/dev/sda",O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_NOFOLLOW);
- if(fd<0){out->error="Cannot open /dev/sda read-only; use HAOS host or configured monitor app";return 3;}
+ if(fd<0){
+  int saved_errno=errno;
+  snprintf(out->access_error,sizeof(out->access_error),"Cannot open /dev/sda read-only: errno=%d (%s); check system-disk access and app Protection mode",saved_errno,strerror(saved_errno));
+  out->error=out->access_error;return 3;
+ }
  int rc=3;unsigned char b[512];
  if(fstat(fd,&st)||!S_ISBLK(st.st_mode)||st.st_rdev!=makedev(8,0)||flock(fd,LOCK_EX|LOCK_NB)){out->error="Block identity or cooperative lock failed";goto done;}
  if(!monitor_read(fd,&inquiry,b,out)||!live_inquiry_identity(b)){out->error="INQUIRY failed or SCSI identity mismatched";goto done;}

@@ -24,7 +24,7 @@ import threading
 import time
 import uuid
 
-VERSION = "0.3.2"
+VERSION = "0.3.3"
 BINARY = "/usr/local/bin/startech-raid-status"
 EXPECTED_BINARY_SHA256 = "BUILD_BACKEND_SHA256"
 SUPERVISOR_IP = "172.30.32.2"
@@ -306,7 +306,7 @@ def handler(state, mode, trusted_proxy=SUPERVISOR_IP):
             if path == "/api/config":
                 return self.reply(200, {"options": state.config, "api_token": state.identity["api_token"],
                                         "host": socket.gethostname().replace("_", "-"), "port": 8098,
-                                        "hardware": "/dev/sda; USB 174c:55aa; firmware 161028_B5_30_81"})
+                                        "hardware": "System disk: full_access requires Protection mode off; AppArmor on; fixed /dev/sda read-only; USB 174c:55aa; firmware 161028_B5_30_81"})
             if path == "/api/logs":
                 with state.lock:
                     return self.reply(200, {"lines": list(state.logs)})
