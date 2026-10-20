@@ -1,0 +1,37 @@
+name: Validate ARM64 app
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: App service tests without hardware
+        run: python3 tests/private_app_test.py -v
+      - name: Compile and test fixed-read backend without hardware
+        run: |
+          mkdir -p .build
+          cc -std=c11 -Os -Wall -Wextra -Werror startech_raid/src/startech_status.c -o .build/status
+          python3 tests/monitor_cli_test.py .build/status
+          cc -std=c11 -D_GNU_SOURCE -O1 -g -fsanitize=address,undefined -Wall -Wextra -Werror tests/monitor_test.c -o .build/mock
+          python3 tests/monitor_json_test.py .build/mock
+      - name: Build app container from reviewed upstream base
+        run: docker build --pull -t startech-raid:check startech_raid
+      - name: Offline container CLI smoke test (no device mapping)
+        run: |
+          docker run --rm --network none --entrypoint /usr/local/bin/startech-raid-status startech-raid:check --help
+          docker run --rm --network none --entrypoint /usr/local/bin/startech-raid-status startech-raid:check explain 1
+      - name: Verify built-in backend checksum without starting collector
+        run: |
+          docker run --rm --network none --entrypoint python3 startech-raid:check -c 'import sys,hashlib;sys.path.insert(0,"/app");import server;assert hashlib.sha256(open(server.BINARY,"rb").read()).hexdigest()==server.EXPECTED_BINARY_SHA256'
+      - name: Record resolved image package inventory
+        run: docker run --rm --network none --entrypoint apk startech-raid:check info -v > .build/image-packages.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: resolved-image-package-inventory
+          path: .build/image-packages.txt

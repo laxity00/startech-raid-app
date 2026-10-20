@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.build/
+.env
+identity.json
+options.json
+latest.json
+*.log

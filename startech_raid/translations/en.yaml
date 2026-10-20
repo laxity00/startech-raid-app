@@ -1,0 +1,13 @@
+configuration:
+  interval_seconds:
+    name: Collection interval
+    description: Seconds between completed collections (60–3600). Default five minutes.
+  enable_smart:
+    name: Collect SSD SMART data
+    description: Read identity, attributes and thresholds for both SSDs. No self-tests or settings changes.
+  temperature_warning_c:
+    name: Temperature warning threshold
+    description: User warning level in Celsius; not a manufacturer limit. Temperature interpretation remains provisional.
+  log_level:
+    name: Log level
+    description: Logs never include the integration token or raw device sectors.

@@ -1,0 +1,610 @@
+{
+  "schema": 1,
+  "tool_version": "0.3.2",
+  "sample_time_unix": 2000000000,
+  "device": "/dev/sda",
+  "expected_firmware": "161028_B5_30_81",
+  "query_ok": true,
+  "raid_raw": 1,
+  "raid_status": "Healthy",
+  "raid_display": "1 - Healthy",
+  "mapping_validation": "static_reverse_engineering",
+  "transport_validated_on_target": true,
+  "known_condition_validated": false,
+  "array_synchronization_verified": false,
+  "state_address": "0x0aed",
+  "smart_requested": true,
+  "smart_complete": true,
+  "duplicate_ssd_identity": false,
+  "error": null,
+  "ssds": [
+    {
+      "port": 0,
+      "requested": true,
+      "identity_verified": true,
+      "presence": "responded_to_identify",
+      "model": "Synthetic SSD",
+      "serial": "TEST-SERIAL-0",
+      "firmware": "TEST0001",
+      "capacity_bytes": 256000000000,
+      "smart_data_valid": true,
+      "smart_thresholds_valid": true,
+      "smart_overall_health": "Unknown",
+      "ata_return_status_queried": false,
+      "attribute_check": "Passed",
+      "attributes_compared": 1,
+      "failed_prefail_attributes": 0,
+      "temperature_candidate_c": 35,
+      "temperature_attribute": 194,
+      "temperature_source": "vendor_attribute_raw_byte0_unverified",
+      "array_membership": "Unknown",
+      "error": null,
+      "attributes": [
+        {
+          "id": 1,
+          "flags": 1,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 50
+        },
+        {
+          "id": 2,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 3,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 4,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 5,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 6,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 7,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 8,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 9,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 10,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 11,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 12,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 13,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 14,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 15,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 16,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 17,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 18,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 19,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 20,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 21,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 22,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 23,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 24,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 25,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 26,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 27,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 28,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 29,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 194,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 35,
+          "raw_hex": "230000000000",
+          "threshold": 0
+        }
+      ]
+    },
+    {
+      "port": 1,
+      "requested": true,
+      "identity_verified": true,
+      "presence": "responded_to_identify",
+      "model": "Synthetic SSD",
+      "serial": "TEST-SERIAL-1",
+      "firmware": "TEST0001",
+      "capacity_bytes": 256000000000,
+      "smart_data_valid": true,
+      "smart_thresholds_valid": true,
+      "smart_overall_health": "Unknown",
+      "ata_return_status_queried": false,
+      "attribute_check": "Passed",
+      "attributes_compared": 1,
+      "failed_prefail_attributes": 0,
+      "temperature_candidate_c": 35,
+      "temperature_attribute": 194,
+      "temperature_source": "vendor_attribute_raw_byte0_unverified",
+      "array_membership": "Unknown",
+      "error": null,
+      "attributes": [
+        {
+          "id": 1,
+          "flags": 1,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 50
+        },
+        {
+          "id": 2,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 3,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 4,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 5,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 6,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 7,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 8,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 9,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 10,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 11,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 12,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 13,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 14,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 15,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 16,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 17,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 18,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 19,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 20,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 21,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 22,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 23,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 24,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 25,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 26,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 27,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 28,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 29,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 0,
+          "raw_hex": "000000000000",
+          "threshold": 0
+        },
+        {
+          "id": 194,
+          "flags": 0,
+          "normalized": 100,
+          "worst": 100,
+          "raw": 35,
+          "raw_hex": "230000000000",
+          "threshold": 0
+        }
+      ]
+    }
+  ]
+}
