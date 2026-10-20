@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import hashlib
 import hmac
+from smart import metadata, indicators
 import json
 import logging
 from logging.handlers import RotatingFileHandler
@@ -24,7 +25,7 @@ import threading
 import time
 import uuid
 
-VERSION = "0.3.4"
+VERSION = "0.3.5"
 BINARY = "/usr/local/bin/startech-raid-status"
 EXPECTED_BINARY_SHA256 = "BUILD_BACKEND_SHA256"
 SUPERVISOR_IP = "172.30.32.2"
@@ -206,6 +207,10 @@ class State:
             if not data["fresh"] or not data["query_ok"] or data.get("duplicate_ssd_identity"):
                 for disk in data["ssds"]:
                     disk.update(identity_verified=False, temperature_candidate_c=None, attribute_check="Unknown")
+            for disk in data["ssds"]:
+                for attr in disk.get("attributes", []):
+                    attr.update(metadata(disk, attr["id"]))
+                disk["warning_indicators"] = indicators(disk)
             data.update(api_version=1, app_version=VERSION, instance_id=self.identity["instance_id"],
                         known_ssds=list(deepcopy(self.known).values()),
                         service={"interval_seconds": self.config["interval_seconds"],
@@ -237,7 +242,11 @@ def worker(state, stop, logger, collector=collect):
             if smart and not value.get("smart_complete"):
                 state.smart_paused = True
             state.accept(value, 1000 * (time.monotonic() - start))
-            log = logger.info if value.get("query_ok") and value.get("raid_raw") == 1 and not state.persistence_error else logger.warning
+            warning_keys = sorted({key for disk in state.snapshot()["ssds"]
+                                   for key, active in disk.get("warning_indicators", {}).items() if active is True})
+            if warning_keys:
+                logger.warning("SSD warning indicators: %s; inferred meanings; counters may be historical", ", ".join(warning_keys))
+            log = logger.info if not warning_keys and value.get("query_ok") and value.get("raid_raw") == 1 and not state.persistence_error else logger.warning
             log("RAID %s | SMART %s | %s", value.get("raid_display", "Unknown"),
                         "complete" if value.get("smart_complete") else "partial/off",
                         value.get("error") or "collection completed")

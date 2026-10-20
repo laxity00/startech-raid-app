@@ -1,4 +1,9 @@
-# 0.3.4
+# 0.3.5
+
+SMART candidate labels, conservative warning entities and important counter enablement.
+Preserve SMART table expansion during refresh. Fixed hardware request set unchanged.
+
+# 0.3.5
 
 - Move the exclusive cooperative lock from the read-only block device to a checked regular runtime file; retain a shared read lock on the disk.
 - Preserve AppArmor raw-write denials and the approved hardware permission scope.

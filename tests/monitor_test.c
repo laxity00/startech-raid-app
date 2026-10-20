@@ -106,7 +106,7 @@ static int fake_ioctl(int fd,unsigned long op,...) {
    assert(c[14]==0xb0&&(c[4]==0xd0||c[4]==0xd1));expected[14]=0xb0;expected[4]=c[4];expected[10]=0x4f;expected[12]=0xc2;assert(!memcmp(c,expected,16));
    if(c[4]==0xd1&&scenario==5&&port==0){errno=EIO;return -1;}
    b[0]=1;b[2]=5;
-   if(c[4]==0xd0){b[3]=1;b[5]=(unsigned char)(scenario==13?5:100);b[6]=100;b[7]=0;b[14]=194;b[17]=100;b[18]=100;b[19]=35;}
+   if(c[4]==0xd0){if(scenario==0)memcpy(b+400,"SMI2259XT\0",10);b[3]=1;b[5]=(unsigned char)(scenario==13?5:100);b[6]=100;b[7]=0;b[14]=194;b[17]=100;b[18]=100;b[19]=35;}
    else b[3]=10;
    checksum(b);
    if(c[4]==0xd0&&scenario==4&&port==0)b[511]++;

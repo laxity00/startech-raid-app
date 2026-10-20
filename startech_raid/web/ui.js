@@ -3,6 +3,7 @@ const $ = id => document.getElementById(id);
 const text = (id, value) => { $(id).textContent = value ?? "—"; };
 const date = value => value ? new Date(value * 1000).toLocaleString() : "Not yet collected";
 let page = "overview";
+const attributePanels = new Map();
 async function read(path) {
   const response = await fetch(path, {cache: "no-store", credentials: "same-origin"});
   if (!response.ok) throw new Error(`Page request failed (${response.status}). Open this app through Home Assistant.`);
@@ -24,7 +25,12 @@ function pair(list, key, value) {
   term.textContent = key; definition.textContent = value ?? "Unknown"; list.append(term, definition);
 }
 function drives(data) {
-  const cards = $("drive-cards"); cards.replaceChildren();
+  const cards = $("drive-cards");
+  // Read live state before replacing nodes; detached toggle events cannot overwrite it.
+  cards.querySelectorAll("details[data-smart-port]").forEach(panel => {
+    attributePanels.set(panel.dataset.smartPort, panel.open);
+  });
+  cards.replaceChildren();
   for (const port of [0, 1]) {
     const disk = data.ssds.find(d => d.port === port), known = data.known_ssds.find(d => d.port === port);
     const valid = data.query_ok && disk?.identity_verified, identity = valid ? disk : known;
@@ -39,19 +45,26 @@ function drives(data) {
     pair(info, "Current visibility", valid ? "Identified independently" : "Not verified in this sample");
     pair(info, "Pre-fail thresholds", valid ? disk.attribute_check : "Unknown");
     pair(info, "Attributes compared", valid ? disk.attributes_compared : null);
+    pair(info, "Media error indicators", disk?.warning_indicators?.media_error_warning == null ? "Unknown" : disk.warning_indicators.media_error_warning ? "Warning: nonzero error counters (may be historical)" : "No nonzero media error counters");
+    pair(info, "Interface CRC errors", disk?.warning_indicators?.interface_error_warning == null ? "Unknown" : disk.warning_indicators.interface_error_warning ? "Warning: check connection; count may be historical" : "None reported");
+    pair(info, "Remaining-life warning", disk?.warning_indicators?.life_warning == null ? "Unknown" : disk.warning_indicators.life_warning ? "Estimated life at or below 20% (inferred)" : "Estimated life above 20% (inferred)");
     pair(info, "SMART overall", "Unknown · RETURN STATUS unavailable");
     pair(info, "Port error", disk?.error || "None reported"); card.append(info);
     const details = document.createElement("details"), summary = document.createElement("summary");
+    details.dataset.smartPort = String(port);
+    details.open = attributePanels.get(String(port)) ?? false;
     summary.textContent = "SMART attribute table"; details.append(summary);
     const table = document.createElement("table"), head = document.createElement("tr");
-    for (const name of ["ID", "Current", "Worst", "Threshold", "Raw"]) { const cell = document.createElement("th"); cell.textContent = name; head.append(cell); }
+    for (const name of ["ID", "Meaning (inferred)", "Current", "Worst", "Threshold", "Raw"]) { const cell = document.createElement("th"); cell.textContent = name; head.append(cell); }
     table.append(head);
     for (const a of valid && disk.smart_data_valid ? disk.attributes : []) {
       const row = document.createElement("tr");
-      for (const v of [a.id, a.normalized, a.worst, a.threshold, a.raw]) { const cell = document.createElement("td"); cell.textContent = v ?? "—"; row.append(cell); }
+      row.title = a.source ?? "No matching interpretation profile";
+      for (const v of [a.id, a.label ?? "Vendor-specific attribute", a.normalized, a.worst, a.threshold, a.raw]) { const cell = document.createElement("td"); cell.textContent = v ?? "—"; row.append(cell); }
       table.append(row);
     }
-    details.append(table); card.append(details); cards.append(card);
+    const scroll = document.createElement("div"); scroll.className = "smart-table-scroll";
+    scroll.append(table); details.append(scroll); card.append(details); cards.append(card);
   }
 }
 function chart(samples) {

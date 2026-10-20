@@ -13,6 +13,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: App service tests without hardware
         run: python3 tests/private_app_test.py -v
+      - name: Preserve SMART table expansion
+        run: node tests/ui_test.cjs
       - name: Compile and test fixed-read backend without hardware
         run: |
           mkdir -p .build

@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "tool_version": "0.3.4",
+  "tool_version": "0.3.5",
   "sample_time_unix": 2000000000,
   "device": "/dev/sda",
   "expected_firmware": "161028_B5_30_81",

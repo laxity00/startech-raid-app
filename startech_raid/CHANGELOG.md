@@ -1,3 +1,10 @@
+# 0.3.5
+
+- Label all 30 SMART attributes for the matched SMI2259XT/Y0507A0 profile, retaining inference limits.
+- Expose and log media, interface and remaining-life warning indicators from existing read data.
+- Preserve each SMART table expander across refreshes, with mobile horizontal scrolling.
+- Fixed requests, read-only disk access and AppArmor permissions unchanged.
+
 # 0.3.0
 
 - Private ingress UI: overview, SSDs and temperature chart, configuration, logs, documentation.

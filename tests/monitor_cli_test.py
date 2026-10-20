@@ -12,7 +12,7 @@ def run(args, code=0):
     assert result.returncode == code, (args, result.returncode, result.stdout, result.stderr)
     return result.stdout
 
-assert "0.3.4" in run(["--help"])
+assert "0.3.5" in run(["--help"])
 assert "No hardware access" in run([])
 for raw, label in [(0,"Unknown"),(1,"Healthy"),(2,"Degraded"),(3,"Failed"),(4,"Rebuilding"),(5,"Unknown"),(6,"Unknown"),(255,"Unknown")]:
     assert run(["explain",str(raw)]).strip() == f"{raw} - {label}"

@@ -3,7 +3,7 @@
 #include "fixed_transport.c"
 #include <inttypes.h>
 #include <time.h>
-#define STATUS_VERSION "0.3.4"
+#define STATUS_VERSION "0.3.5"
 struct disk_info {
  bool identified, data_ok, thresholds_ok;
  unsigned char id[512], data[512], thresholds[512];
@@ -133,6 +133,8 @@ static void disk_json(const struct disk_info *d,unsigned port,bool requested,boo
  printf(",\"firmware\":");if(d->identified)js(d->firmware);else printf("null");
  printf(",\"capacity_bytes\":");uint64_t bytes=capacity(d);if(bytes)printf("%" PRIu64,bytes);else printf("null");
  printf(",\"smart_data_valid\":%s,\"smart_thresholds_valid\":%s,\"smart_overall_health\":\"Unknown\",\"ata_return_status_queried\":false",d->data_ok?"true":"false",d->thresholds_ok?"true":"false");
+ printf(",\"smart_controller_signature\":");
+ if(identity_trusted&&d->data_ok&&!memcmp(d->data+400,"SMI2259XT\0",10))js("SMI2259XT");else printf("null");
  printf(",\"attribute_check\":");js(identity_trusted?check:"Unknown");printf(",\"attributes_compared\":%u,\"failed_prefail_attributes\":%u",compared,failed);
  printf(",\"temperature_candidate_c\":");if(temp>=0&&identity_trusted)printf("%d",temp);else printf("null");
  printf(",\"temperature_attribute\":%u,\"temperature_source\":\"vendor_attribute_raw_byte0_unverified\",\"array_membership\":\"Unknown\",\"error\":",temp_id);

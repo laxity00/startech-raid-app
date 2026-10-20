@@ -129,7 +129,7 @@ the cache and never triggers an extra disk request.
 The integration creates a controller device and serial-identified SSD devices,
 with RAID/collection problems, raw RAID byte, timestamps and durations, drive
 identity, capacity, provisional temperature and pre-fail attribute checks.
-Raw SMART counters are disabled by default and are not assigned unverified units.
+Selected SMART counters for the matched profile are enabled by default; other raw counters remain optional. Unverified units are not assigned.
 Use HA's actual entity picker for dashboards, history/statistics graphs and alerts.
 Download integration diagnostics to obtain a dashboard using registered entity IDs.
 Review all diagnostics before sharing. Runtime identities, logs and backups remain
@@ -152,3 +152,40 @@ Docker base image compilation, musl runtime, AppArmor permissions, HA lifecycle
 and real installation are not yet verified. Package versions are not locked to
 image digests. Review the resolved image dependencies before distributing images.
 See THIRD_PARTY.md for original-code provenance and upstream dependency boundaries.
+
+## SMART labels and warning entities in 0.3.5
+
+Update both the app and HACS integration, then restart Home Assistant Core.
+The app reads the controller signature from the already collected SMART sector;
+no additional hardware commands or permissions are added. Labels apply only to
+the SMI2259XT signature with SSD firmware Y0507A0. They are inferred from family
+documentation, not an Integral-certified attribute specification. Other drives
+retain generic raw labels and these extra warning states remain Unknown.
+
+All 30 attributes receive candidate names for this profile. Raw values stay raw:
+241/242/245 are not converted into bytes, and no write amplification is calculated.
+The candidate life percentage is raw attribute 169, not normalized Current=100.
+Initial bad blocks (163), rated erase ceiling (168), corrected ECC (195), power
+events (192), and workload counters do not alone trigger media failure warnings.
+
+Enabled by default per SSD: media error indicators (any nonzero value among
+5/160/175/176/178/181/182/196/197/198), interface CRC errors (199), and estimated
+remaining life at or below 20% (169, valid range 0..100). These supplement the
+existing pre-fail threshold and user temperature warnings. Counters may record
+historical events: an On warning means investigate, not that failure is imminent.
+Missing or invalid evidence is Unknown/unavailable. SMART overall stays Unknown.
+
+Raw counters 5/9/160/161/169/175/176/178/181/182/196/197/198/199 are now enabled
+for matched drives. Existing unique IDs and entity IDs are preserved. Counters
+disabled by the integration are enabled on update; user-disabled entities stay
+disabled. No notifications are sent automatically. Select these problem entities
+in an HA automation if you want alerts, including collection and RAID problems.
+Add any sensor to an editable dashboard through Add card > By entity. Temperature
+already supports history/statistics; raw vendor counters have no invented units.
+
+SMART table expansion is preserved independently for each port across the
+15-second page refresh and navigation within the current page session.
+
+Sources: [Transcend MTS960T v1.4 tables 18/19](https://docs.rs-online.com/3aeb/A700000012186708.pdf),
+[smartmontools database](https://github.com/smartmontools/smartmontools/blob/master/smartmontools/drivedb.h).
+No vendor firmware, captures, identifiers or third-party implementation is bundled.

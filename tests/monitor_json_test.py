@@ -7,7 +7,7 @@ result = subprocess.run(sys.argv[1:], capture_output=True, text=True, check=True
 samples = [json.loads(line) for line in result.stdout.splitlines()]
 assert len(samples) == 35
 for sample in samples:
-    assert sample["schema"] == 1 and sample["tool_version"] == "0.3.4"
+    assert sample["schema"] == 1 and sample["tool_version"] == "0.3.5"
     assert not sample["array_synchronization_verified"]
     assert len(sample["ssds"]) == 2 and len(sample["transfers"]) <= 9
     if not sample["query_ok"]:
@@ -48,3 +48,8 @@ assert 'runtime lock unavailable' in samples[31]['error']
 assert 'Block fstat failed' in samples[32]['error'] and 'errno=5' in samples[32]['error']
 assert 'runtime lock identity' in samples[33]['error']
 assert all(samples[i]['transfers'] == [] for i in [11,12,20,31,32,33])
+
+assert samples[0]['ssds'][0]['smart_controller_signature'] == 'SMI2259XT'
+assert samples[4]['ssds'][0]['smart_controller_signature'] is None
+assert samples[6]['ssds'][0]['smart_controller_signature'] is None
+assert samples[1]['ssds'][0]['smart_controller_signature'] is None

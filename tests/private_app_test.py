@@ -8,11 +8,13 @@ import subprocess
 import tempfile
 import threading
 import unittest
+import sys
 from unittest.mock import patch
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "startech_raid"))
 spec = importlib.util.spec_from_file_location("private_server", ROOT / "startech_raid/server.py")
 app = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(app)
@@ -162,5 +164,24 @@ class Tests(unittest.TestCase):
         self.state.accept(deepcopy(SAMPLE),50)
         self.assertIsNone(self.state.snapshot()["service"]["persistence_error"])
 
+
+# Additional tests run through the real cached State path.
+def test_smart_labels_and_stale_warnings(self):
+    sample = deepcopy(SAMPLE)
+    disk = sample["ssds"][0]
+    disk.update(firmware="Y0507A0", smart_controller_signature="SMI2259XT")
+    disk["attributes"] = [dict(id=i, raw=0, normalized=100, worst=100, threshold=50, flags=50, raw_hex="000000000000")
+                          for i in [5,160,161,163,168,169,175,176,178,181,182,196,197,198,199]]
+    next(a for a in disk["attributes"] if a["id"] == 169)["raw"] = 20
+    self.state.accept(sample, 100)
+    current = self.state.snapshot()["ssds"][0]
+    self.assertTrue(current["warning_indicators"]["life_warning"])
+    self.assertFalse(current["warning_indicators"]["media_error_warning"])
+    self.assertEqual(current["attributes"][0]["label"], "Reallocated sectors")
+    self.now += 901
+    stale = self.state.snapshot()["ssds"][0]
+    self.assertIsNone(stale["warning_indicators"]["life_warning"])
+    self.assertFalse(stale["attributes"][0]["profile_matched"])
+Tests.test_smart_labels_and_stale_warnings = test_smart_labels_and_stale_warnings
 
 if __name__=="__main__":unittest.main()
