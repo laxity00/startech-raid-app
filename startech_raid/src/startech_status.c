@@ -3,7 +3,7 @@
 #include "fixed_transport.c"
 #include <inttypes.h>
 #include <time.h>
-#define STATUS_VERSION "0.3.3"
+#define STATUS_VERSION "0.3.4"
 struct disk_info {
  bool identified, data_ok, thresholds_ok;
  unsigned char id[512], data[512], thresholds[512];
@@ -37,14 +37,27 @@ static int monitor_collect(bool smart,struct status_report *out) {
  if(geteuid()!=0){out->error="Root and block-device access required";return 3;}
  char sys[PATH_MAX];struct stat st;
  if(!realpath("/sys/class/block/sda",sys)||!live_sysfs_identity(sys)){out->error="Pinned StarTech USB/SCSI identity mismatch";return 3;}
+ /* Exclusive process coordination lives on a regular runtime file. AppArmor
+  * requires MAY_WRITE for LOCK_EX, even if the device itself is O_RDONLY.
+  * Keep a shared read lock on the device: it still conflicts with older tools'
+  * exclusive locks. The runtime lock serializes this service's collectors. */
+ int lockfd=open("/run/startech-raid-status.lock",O_RDWR|O_CREAT|O_NONBLOCK|O_CLOEXEC|O_NOFOLLOW,0600);
+ if(lockfd<0){int e=errno;snprintf(out->access_error,sizeof(out->access_error),"Cannot open collector runtime lock: errno=%d (%s)",e,strerror(e));out->error=out->access_error;return 3;}
+ struct stat lockst;
+ if(fstat(lockfd,&lockst)||!S_ISREG(lockst.st_mode)||lockst.st_uid!=0||lockst.st_nlink!=1||(lockst.st_mode&0777)!=0600){
+  out->error="Collector runtime lock identity/ownership/mode mismatch";close(lockfd);return 3;
+ }
+ if(flock(lockfd,LOCK_EX|LOCK_NB)){int e=errno;snprintf(out->access_error,sizeof(out->access_error),"Collector runtime lock unavailable: errno=%d (%s); another collector may be running",e,strerror(e));out->error=out->access_error;close(lockfd);return 3;}
  int fd=open("/dev/sda",O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_NOFOLLOW);
  if(fd<0){
   int saved_errno=errno;
   snprintf(out->access_error,sizeof(out->access_error),"Cannot open /dev/sda read-only: errno=%d (%s); check system-disk access and app Protection mode",saved_errno,strerror(saved_errno));
-  out->error=out->access_error;return 3;
+  out->error=out->access_error;close(lockfd);return 3;
  }
  int rc=3;unsigned char b[512];
- if(fstat(fd,&st)||!S_ISBLK(st.st_mode)||st.st_rdev!=makedev(8,0)||flock(fd,LOCK_EX|LOCK_NB)){out->error="Block identity or cooperative lock failed";goto done;}
+ if(fstat(fd,&st)){int e=errno;snprintf(out->access_error,sizeof(out->access_error),"Block fstat failed: errno=%d (%s)",e,strerror(e));out->error=out->access_error;goto done;}
+ if(!S_ISBLK(st.st_mode)||st.st_rdev!=makedev(8,0)){out->error="Block identity mismatch; expected /dev/sda major 8 minor 0";goto done;}
+ if(flock(fd,LOCK_SH|LOCK_NB)){int e=errno;snprintf(out->access_error,sizeof(out->access_error),"Block shared read lock failed: errno=%d (%s); check AppArmor or a conflicting collector",e,strerror(e));out->error=out->access_error;goto done;}
  if(!monitor_read(fd,&inquiry,b,out)||!live_inquiry_identity(b)){out->error="INQUIRY failed or SCSI identity mismatched";goto done;}
  if(!live_sysfs_identity(sys)){out->error="Identity changed after INQUIRY";goto done;}
  static const unsigned char expected[]={0x16,0x10,0x28,0xb5,0x30,0x81};
@@ -78,7 +91,7 @@ static int monitor_collect(bool smart,struct status_report *out) {
  if(!live_sysfs_identity(sys)){out->error="Identity changed; discard entire sample";out->state_ok=false;rc=3;goto done;}
  if(out->disks[0].identified&&out->disks[1].identified&&!strcmp(out->disks[0].serial,out->disks[1].serial))out->duplicate_identity=true;
 done:
- close(fd);return rc;
+ close(fd);close(lockfd);return rc;
 }
 static unsigned threshold_for(const struct disk_info *d,unsigned id) {
  if(!d->thresholds_ok)return 0;

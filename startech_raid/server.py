@@ -24,7 +24,7 @@ import threading
 import time
 import uuid
 
-VERSION = "0.3.3"
+VERSION = "0.3.4"
 BINARY = "/usr/local/bin/startech-raid-status"
 EXPECTED_BINARY_SHA256 = "BUILD_BACKEND_SHA256"
 SUPERVISOR_IP = "172.30.32.2"

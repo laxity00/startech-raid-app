@@ -1,5 +1,5 @@
 name: StarTech RAID Monitor
-version: "0.3.3"
+version: "0.3.4"
 slug: startech_raid
 description: Read-only RAID and SSD monitoring with status pages and a companion HA integration
 arch: [aarch64]

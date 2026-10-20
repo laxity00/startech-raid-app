@@ -1,4 +1,28 @@
-# StarTech RAID Monitor 0.3.3 — experimental
+# StarTech RAID Monitor 0.3.4 — experimental
+
+## Read-only lock correction in 0.3.4
+
+AppArmor checks an exclusive flock on a block device as a write-class operation.
+The previous backend requested LOCK_EX on /dev/sda while the profile correctly
+denied raw disk writes. This could fail before INQUIRY even after opening the disk.
+
+The exclusive cooperative collector lock now uses a root-owned regular 0600 file
+at /run/startech-raid-status.lock. It is opened without following symlinks and is
+checked for regular-file type, ownership, mode and link count before locking.
+Its contents are not written. /dev/sda remains O_RDONLY and receives LOCK_SH,
+which still conflicts with older collectors' exclusive device locks. Independent
+containers have separate runtime lock files and shared device locks do not
+exclude other shared readers; do not run duplicate collectors. Locks are advisory.
+No disk-write permission, new request, retry or address override is added.
+
+Identity, fstat, runtime-lock and disk-read-lock failures now report separately.
+No device request is sent if any of these gates fails. Keep the 0.3.3 Protection
+mode setting and leave AppArmor enabled. Stop, update to 0.3.4, start, then inspect
+a fresh sample. No integration update or Core restart is required.
+
+Kernel reference:
+https://github.com/torvalds/linux/blob/master/security/apparmor/lsm.c
+
 
 ## System-disk access in 0.3.3
 
@@ -14,7 +38,7 @@ equivalent to an ordinary single-device grant. No protection setting is changed
 automatically. Leave Protection mode on if you do not accept that scope; the app
 will report Unknown when the system disk cannot be opened.
 
-To try the update: stop the app, refresh the App Store, update to 0.3.3, then turn
+To try the update: stop the app, refresh the App Store, update to 0.3.4, then turn
 off Protection mode for StarTech RAID Monitor only and start it. AppArmor remains
 enabled. Keep all other app protection settings unchanged. If the toggle is not
 visible, enable Advanced mode in your HA user profile. Restarting this app resets

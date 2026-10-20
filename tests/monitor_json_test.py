@@ -5,9 +5,9 @@ import sys
 
 result = subprocess.run(sys.argv[1:], capture_output=True, text=True, check=True)
 samples = [json.loads(line) for line in result.stdout.splitlines()]
-assert len(samples) == 32
+assert len(samples) == 35
 for sample in samples:
-    assert sample["schema"] == 1 and sample["tool_version"] == "0.3.3"
+    assert sample["schema"] == 1 and sample["tool_version"] == "0.3.4"
     assert not sample["array_synchronization_verified"]
     assert len(sample["ssds"]) == 2 and len(sample["transfers"]) <= 9
     if not sample["query_ok"]:
@@ -34,10 +34,17 @@ for index, label in [(8, "255 - Unknown"), (9, "2 - Degraded"), (21, "3 - Failed
 assert samples[13]["ssds"][0]["attribute_check"] == "Failed"
 assert samples[13]["ssds"][0]["failed_prefail_attributes"] == 1
 assert not samples[30]["query_ok"]
-assert not samples[31]["smart_requested"] and len(samples[31]["transfers"]) == 3
+assert not samples[-1]["smart_requested"] and len(samples[-1]["transfers"]) == 3
 print(json.dumps({"mocked_samples": len(samples), "read_only_transport_and_failure_cases": True, "hardware_access": False}))
 
 # An EPERM open denial must be actionable and must not emit any request.
 assert 'errno=1' in samples[12]['error']
 assert 'Protection mode' in samples[12]['error']
 assert samples[12]['transfers'] == []
+
+assert 'Block identity mismatch' in samples[11]['error']
+assert 'shared read lock' in samples[20]['error'] and 'errno=13' in samples[20]['error']
+assert 'runtime lock unavailable' in samples[31]['error']
+assert 'Block fstat failed' in samples[32]['error'] and 'errno=5' in samples[32]['error']
+assert 'runtime lock identity' in samples[33]['error']
+assert all(samples[i]['transfers'] == [] for i in [11,12,20,31,32,33])

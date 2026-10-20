@@ -1,16 +1,18 @@
-# 0.3.3
+# 0.3.4
 
-- Fix HAOS system-disk access by declaring full_access, requiring the user to
-  disable Protection mode for this app. No settings are changed automatically.
-- Retain AppArmor and add denies for other block devices/alternate raw paths.
-- Include errno in read-only disk-open errors.
-- Retain the same nine fixed requests, identity/version gates and read-only opens.
-- Live system-disk app access still requires confirmation from an installation.
+- Move the exclusive cooperative lock from the read-only block device to a checked regular runtime file; retain a shared read lock on the disk.
+- Preserve AppArmor raw-write denials and the approved hardware permission scope.
+- Separate fstat, block identity, runtime lock and disk read-lock errors.
+- Test lock cleanup and zero-request failure paths.
 
 # 0.3.3
 
-- Add GitHub app repository metadata and UI installation documentation.
-- Compile the original fixed-read backend from source in the app image.
-- Show the actual container hostname for companion integration setup.
-- Exclude research tools, firmware and user environment details.
-- Experimental: live HAOS app validation remains outstanding.
+- Declare opt-in full_access for the HAOS system disk; the user must disable Protection mode for this app.
+- Retain AppArmor and deny other block devices and alternate raw paths.
+- Include errno in disk-open errors.
+
+# 0.3.2
+
+- Publish clean app repository metadata and installation documentation.
+- Build the fixed-read monitor from source inside the app image.
+- Show the actual app hostname for the companion integration.

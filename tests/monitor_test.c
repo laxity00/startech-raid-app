@@ -30,13 +30,18 @@ static char *fake_realpath(const char *,char *);
 #undef geteuid
 #undef realpath
 static char fixture[PATH_MAX];
-static int scenario,calls,opens,closes;
+static int scenario,calls,opens,closes,lock_opens,lock_closes;
 static unsigned next_port;
 static void put(const char *suffix,const char *value) {
  char p[PATH_MAX];assert(snprintf(p,sizeof(p),"%s/%s",fixture,suffix)<(int)sizeof(p));
  FILE *f=fopen(p,"w");assert(f);assert(fputs(value,f)>=0);assert(!fclose(f));
 }
 static int fake_open(const char *path,int flags,...) {
+ if(!strcmp(path,"/run/startech-raid-status.lock")) {
+  assert((flags&O_ACCMODE)==O_RDWR&&!(flags&O_TRUNC));
+  assert((flags&(O_CREAT|O_CLOEXEC|O_NOFOLLOW|O_NONBLOCK))==(O_CREAT|O_CLOEXEC|O_NOFOLLOW|O_NONBLOCK));
+  lock_opens++;return 124;
+ }
  if(!strcmp(path,"/dev/sda")) {
   assert((flags&O_ACCMODE)==O_RDONLY);assert(!(flags&(O_CREAT|O_TRUNC|O_EXCL)));
   assert((flags&(O_CLOEXEC|O_NOFOLLOW|O_NONBLOCK))==(O_CLOEXEC|O_NOFOLLOW|O_NONBLOCK));
@@ -45,9 +50,14 @@ static int fake_open(const char *path,int flags,...) {
  }
  assert(!strncmp(path,fixture,strlen(fixture)));return open(path,flags);
 }
-static int fake_close(int fd){if(fd==123){closes++;return 0;}return close(fd);}
-static int fake_fstat(int fd,struct stat *s){assert(fd==123);memset(s,0,sizeof(*s));s->st_mode=S_IFBLK;s->st_rdev=makedev(8,scenario==11?1:0);return 0;}
-static int fake_flock(int fd,int flags){assert(fd==123&&flags==(LOCK_EX|LOCK_NB));return scenario==20?-1:0;}
+static int fake_close(int fd){if(fd==124){lock_closes++;return 0;}if(fd==123){closes++;return 0;}return close(fd);}
+static int fake_fstat(int fd,struct stat *s){
+ if(fd==124){memset(s,0,sizeof(*s));s->st_mode=S_IFREG|0600;s->st_uid=scenario==33?1000:0;s->st_nlink=1;return 0;}
+ assert(fd==123);if(scenario==32){errno=EIO;return -1;}memset(s,0,sizeof(*s));s->st_mode=S_IFBLK;s->st_rdev=makedev(8,scenario==11?1:0);return 0;}
+static int fake_flock(int fd,int flags){
+ if(fd==124){assert(flags==(LOCK_EX|LOCK_NB));if(scenario==31){errno=EWOULDBLOCK;return -1;}return 0;}
+ assert(fd==123&&flags==(LOCK_SH|LOCK_NB));if(scenario==20){errno=EACCES;return -1;}return 0;
+}
 static uid_t fake_geteuid(void){return scenario==10?1000:0;}
 static char *fake_realpath(const char *p,char *out){assert(!strcmp(p,"/sys/class/block/sda"));strcpy(out,fixture);return out;}
 static void checksum(unsigned char *b){unsigned sum=0;for(unsigned i=0;i<511;i++)sum+=b[i];b[511]=(unsigned char)(0u-sum);}
@@ -113,12 +123,14 @@ int main(void){
  strcpy(fixture,"/tmp/asm-monitor-test-XXXXXX");assert(mkdtemp(fixture));char p[PATH_MAX];
  assert(snprintf(p,sizeof(p),"%s/device",fixture)<(int)sizeof(p));assert(!mkdir(p,0700));
  put("device/vendor","StarTech\n");put("device/model","RAID 1\n");put("device/rev","0\n");put("idVendor","174c\n");put("idProduct","55aa\n");
- for(scenario=0;scenario<=30;scenario++){
-  put("serial","00000000000000000001\n");calls=opens=closes=0;next_port=0;
+ for(scenario=0;scenario<=33;scenario++){
+  put("serial","00000000000000000001\n");calls=opens=closes=lock_opens=lock_closes=0;next_port=0;
   struct status_report result;int rc=monitor_collect(true,&result);
-  int expected_rc=scenario==1||scenario==7||scenario==10||scenario==11||scenario==12||scenario==16||scenario==17||scenario==18||scenario==20||scenario==30?3:scenario==2||scenario==8||scenario==15||scenario==19||scenario==23?4:0;
+  int expected_rc=scenario==1||scenario==7||scenario==10||scenario==11||scenario==12||scenario==16||scenario==17||scenario==18||scenario==20||scenario==30||scenario>=31?3:scenario==2||scenario==8||scenario==15||scenario==19||scenario==23?4:0;
   assert(rc==expected_rc);assert(result.count==(unsigned)calls);
-  assert(opens==(scenario==10?0:1));assert(closes==(scenario==10||scenario==12?0:1));
+  assert(opens==(scenario==10||scenario==31||scenario==33?0:1));assert(closes==(scenario==10||scenario==12||scenario==31||scenario==33?0:1));
+  assert(lock_opens==(scenario==10?0:1)&&lock_closes==lock_opens);
+  if(scenario==11||scenario==12||scenario==20||scenario>=31)assert(calls==0);
   if(scenario==0){assert(calls==9&&smart_complete(&result));assert(capacity(&result.disks[0])==35651584);}
   if(scenario==3){assert(calls==7&&!result.disks[0].identified&&result.disks[1].thresholds_ok);}
   if(scenario==4){assert(calls==8&&!result.disks[0].data_ok&&result.disks[1].thresholds_ok);}
@@ -142,11 +154,11 @@ int main(void){
  const int cli_codes[]={0,7,7,0,0,0,4,3};
  char *cli[]={"startech-status","status","--smart","--json"};
  for(unsigned i=0;i<sizeof(cli_scenarios)/sizeof(*cli_scenarios);i++){
-  scenario=cli_scenarios[i];put("serial","00000000000000000001\n");calls=opens=closes=0;next_port=0;
+  scenario=cli_scenarios[i];put("serial","00000000000000000001\n");calls=opens=closes=lock_opens=lock_closes=0;next_port=0;
   assert(monitor_main(4,cli)==cli_codes[i]);
  }
  assert(!fflush(stdout));assert(!ftruncate(fileno(sink),0));rewind(sink);
- scenario=0;put("serial","00000000000000000001\n");calls=opens=closes=0;next_port=0;
+ scenario=0;put("serial","00000000000000000001\n");calls=opens=closes=lock_opens=lock_closes=0;next_port=0;
  char *human[]={"startech-status","status","--smart"};assert(!monitor_main(3,human));assert(!fflush(stdout));rewind(sink);
  char human_text[4096];size_t human_n=fread(human_text,1,sizeof(human_text)-1,sink);human_text[human_n]=0;
  assert(strstr(human_text,"1 - Healthy")&&strstr(human_text,"SSD port 0")&&strstr(human_text,"SSD port 1")&&strstr(human_text,"35 C"));
